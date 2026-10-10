@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EL AHORCADO | Juego de Vocabulario en Español</title>
+  <meta name="description" content="Juego interactivo del Ahorcado desarrollado con JavaScript Vanilla, CSS3 moderno, Web Audio API y gráficos SVG vectoriales adaptativos.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Barra superior de navegación y controles de sesión -->
+    <header class="app-header">
+      <div class="brand">
+        <h1 class="brand-title">EL AHORCADO</h1>
+      </div>
+      <div class="header-actions">
+        <button id="btn-restart" class="btn btn-ghost btn-sm hidden" type="button" title="Reiniciar ronda actual con una nueva palabra">
+          <span class="btn-icon" aria-hidden="true">↻</span>
+          <span>Reiniciar Ronda</span>
+        </button>
+        <button id="btn-theme-toggle" class="icon-button" type="button" aria-label="Cambiar tema de color" title="Alternar modo claro / oscuro">
+          <svg id="theme-icon" class="theme-svg-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <!-- Icono SVG inyectado por ui.js -->
+          </svg>
+        </button>
+        <button id="btn-sound-toggle" class="icon-button" type="button" aria-label="Silenciar sonido" title="Conmutar sonido">
+          <span class="sound-icon" aria-hidden="true">🔊</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Contenedor dinámico de vistas con transición fluida -->
+    <div class="app-views-container">
+
+      <!-- VISTA 1: PANTALLA DE BIENVENIDA (ONBOARDING UX) -->
+      <section id="view-welcome" class="view-screen active" aria-label="Pantalla de bienvenida e inicio de partida">
+        <div class="welcome-card">
+          <div class="welcome-badge">
+            <span class="welcome-badge-icon" aria-hidden="true">🎯</span>
+          </div>
+
+          <h2 class="welcome-heading">Descubre la Palabra Secreta</h2>
+          <p class="welcome-lead">
+            Pon a prueba tu vocabulario en español. Adivina las letras de la palabra oculta antes de agotar los 7 intentos permitidos.
+          </p>
+
+          <!-- Tarjeta de Récord Histórico Persistido -->
+          <div class="welcome-record-card">
+            <span class="record-card-label">Récord Histórico</span>
+            <div class="record-card-figure">
+              <span id="welcome-score-max" class="record-card-value">0</span>
+              <span class="record-card-unit">PTS</span>
+            </div>
+          </div>
+
+          <!-- Botón de Llamada a la Acción Principal -->
+          <div class="welcome-action-wrap">
+            <button type="button" id="btn-welcome-start" class="btn btn-primary btn-lg">
+              Comenzar Partida
+            </button>
+          </div>
+
+          <!-- Reglas rápidas visuales -->
+          <div class="welcome-pills">
+            <div class="welcome-pill">
+              <span class="pill-dot dot-emerald"></span>
+              <span>7 a 10 letras</span>
+            </div>
+            <div class="welcome-pill">
+              <span class="pill-dot dot-crimson"></span>
+              <span>Máx. 7 fallos</span>
+            </div>
+            <div class="welcome-pill">
+              <span class="pill-dot dot-amber"></span>
+              <span>1.000 palabras</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VISTA 2: TABLERO DE JUEGO ACTIVO -->
+      <section id="view-game" class="view-screen hidden" aria-label="Tablero de juego">
+        <main class="game-dashboard">
+
+          <!-- ZONA SUPERIOR / CENTRAL: Ilustración SVG y Casillas de la Palabra -->
+          <div class="dashboard-hero-grid">
+            
+            <!-- Bento SVG del Ahorcado -->
+            <div class="bento-card card-canvas">
+              <div class="canvas-header">
+                <span class="canvas-tag">Ejecución Progresiva</span>
+                <span class="canvas-pill">7 Intentos</span>
+              </div>
+              <div class="svg-wrapper">
+                <svg id="hangman-svg" class="hangman-canvas" viewBox="0 0 240 280" role="img" aria-label="Progreso gráfico del ahorcado">
+                  <!-- 1. Base del suelo -->
+                  <path class="hangman-part" id="part-1" pathLength="1" d="M 25 255 L 115 255" />
+                  <!-- 2. Poste vertical -->
+                  <path class="hangman-part" id="part-2" pathLength="1" d="M 70 255 L 70 30" />
+                  <!-- 3. Travesaño superior con soporte diagonal -->
+                  <path class="hangman-part" id="part-3" pathLength="1" d="M 68 30 L 175 30 M 70 75 L 115 30" />
+                  <!-- 4. Cuerda -->
+                  <path class="hangman-part" id="part-4" pathLength="1" d="M 170 30 L 170 72" />
+                  <!-- 5. Cabeza (cy = 92, r = 20 -> base en y = 112) -->
+                  <circle class="hangman-part" id="part-5" pathLength="1" cx="170" cy="92" r="20" />
+                  <!-- 6. Tronco / cuerpo (inicia en y = cy + r = 112) -->
+                  <path class="hangman-part" id="part-6" pathLength="1" d="M 170 112 L 170 172" />
+                  <!-- 7. Brazos y piernas (unión de extremidades en cadera y pecho) -->
+                  <path class="hangman-part" id="part-7" pathLength="1" d="M 138 146 L 170 128 L 202 146 M 140 218 L 170 172 L 200 218" />
+                </svg>
+              </div>
+            </div>
+
+            <!-- Bento Casillas de la Palabra y Formulario de Entrada -->
+            <div class="bento-card card-word-area">
+              <div class="word-card-header">
+                <span class="canvas-tag">Palabra Secreta</span>
+                <span class="rules-hint">Mayúsculas sin tildes</span>
+              </div>
+
+              <!-- Casillas dinámicas individuales de lectura exclusiva -->
+              <div id="word-slots-container" class="word-slots-wrap" role="region" aria-live="polite">
+                <!-- Inyectado dinámicamente desde ui.js -->
+              </div>
+
+              <!-- Entrada de letra candidata con botón Comprobar -->
+              <form id="guess-form" class="guess-form" autocomplete="off" novalidate>
+                <div class="input-row">
+                  <label for="letter-input" class="visually-hidden">Ingresa una letra</label>
+                  <input 
+                    type="text" 
+                    id="letter-input" 
+                    class="letter-input-box" 
+                    maxlength="1" 
+                    placeholder="-" 
+                    autocomplete="off" 
+                    autocapitalize="characters" 
+                    spellcheck="false"
+                    aria-label="Letra candidata"
+                    disabled
+                  />
+                  <button type="submit" id="btn-check" class="btn btn-primary" disabled>
+                    Comprobar Letra
+                  </button>
+                </div>
+              </form>
+            </div>
+
+          </div>
+
+          <!-- ZONA INFERIOR: Métricas de Sesión (izq) y Teclado Virtual (der) -->
+          <div class="dashboard-controls-grid">
+
+            <!-- Panel de Estadísticas Compacto (Directamente debajo de Ejecución Progresiva) -->
+            <div class="bento-card card-stats-compact">
+              <span class="canvas-tag">Métricas de Sesión</span>
+              <div class="stats-compact-grid">
+                
+                <div class="stat-pill stat-pill-score">
+                  <span class="stat-pill-label">Puntuación Actual</span>
+                  <span id="stat-score-session" class="stat-pill-val">0</span>
+                </div>
+
+                <div class="stat-pill">
+                  <span class="stat-pill-label">Última Jugada</span>
+                  <span id="stat-score-last" class="stat-pill-val">0</span>
+                </div>
+
+                <div class="stat-pill stat-pill-record">
+                  <span class="stat-pill-label">Récord Máximo</span>
+                  <span id="stat-score-max" class="stat-pill-val">0</span>
+                </div>
+
+                <div class="stat-pill stat-pill-misses">
+                  <span class="stat-pill-label">Fallos</span>
+                  <div class="misses-pill-val">
+                    <span id="stat-misses-current" class="miss-current">0</span>
+                    <span class="miss-sep">/</span>
+                    <span id="stat-misses-max" class="miss-max">7</span>
+                  </div>
+                </div>
+
+                <div class="stat-pill stat-pill-words">
+                  <span class="stat-pill-label">Palabras Restantes</span>
+                  <span id="stat-words-remaining" class="stat-pill-val">1000</span>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Teclado en pantalla interactivo (Directamente debajo de Palabra Secreta) -->
+            <div class="bento-card card-keyboard">
+              <div id="virtual-keyboard" class="virtual-keyboard" role="group" aria-label="Teclado interactivo español">
+                <!-- Renderizado dinámico desde ui.js -->
+              </div>
+            </div>
+
+          </div>
+
+        </main>
+      </section>
+
+    </div>
+
+    <!-- Modales nativos <dialog> -->
+
+    <!-- Modal 1: Victoria -->
+    <dialog id="modal-victory" class="native-modal modal-success" aria-labelledby="victory-title">
+      <div class="modal-content">
+        <div class="modal-icon-badge success-badge">🏆</div>
+        <h2 id="victory-title" class="modal-title">¡Victoria! Enhorabuena</h2>
+        <p class="modal-description">Has completado la palabra antes de alcanzar los 7 fallos.</p>
+        
+        <div class="modal-details-card">
+          <div class="detail-row">
+            <span class="detail-label">Palabra acertada:</span>
+            <span id="victory-word" class="detail-val-word"></span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Puntos en esta ronda:</span>
+            <span id="victory-round-score" class="detail-val-points">0</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Puntuación acumulada:</span>
+            <span id="victory-total-score" class="detail-val-total">0</span>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" id="btn-victory-next" class="btn btn-primary btn-block">
+            Siguiente Palabra
+          </button>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- Modal 2: Derrota -->
+    <dialog id="modal-defeat" class="native-modal modal-failure" aria-labelledby="defeat-title">
+      <div class="modal-content">
+        <div class="modal-icon-badge failure-badge">💀</div>
+        <h2 id="defeat-title" class="modal-title">Fin de la Partida</h2>
+        <p class="modal-description">Has alcanzado el límite estricto de 7 fallos.</p>
+        
+        <div class="modal-details-card">
+          <div class="detail-row">
+            <span class="detail-label">La palabra oculta era:</span>
+            <span id="defeat-word" class="detail-val-word text-crimson"></span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Puntuación total lograda:</span>
+            <span id="defeat-total-score" class="detail-val-total">0</span>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" id="btn-defeat-next" class="btn btn-primary btn-block">
+            Jugar Otra Ronda
+          </button>
+        </div>
+      </div>
+    </dialog>
+
+    <footer class="app-footer">
+      <span>Reglas estándar de vocabulario en español • Puntos = (Aciertos) × (7 - Fallos)</span>
+    </footer>
+  </div>
+
+  <!-- Capas de script desacopladas -->
+  <script src="js/audio.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
