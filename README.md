@@ -1,2 +1,2 @@
-# [Enlace al proyecto]([https://www.ejemplo.com](https://rladgar.github.io/AW_AHORCADO/))
+# [Enlace al proyecto](https://rladgar.github.io/AW_AHORCADO/)
 
