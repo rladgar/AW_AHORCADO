@@ -1,6 +1,6 @@
 # UNIDAD 1. Punto de partida. Dónde estamos?
 
-# [Enlace al proyecto](https://rladgar.github.io/AW_AHORCADO/)
+# [Enlace al Juego](https://rladgar.github.io/AW_AHORCADO/)
 
 ## Índice
 
